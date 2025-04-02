@@ -1,0 +1,69 @@
+<!--This HTML can be removed or replaced. The default code below replaces the text in the element with different messages. 
+You can use your own element with the id="user-message" or none at all. If you use your own element, make sure to remove 
+this one since the script will only update the first HTML element with the ID.-->
+<h2 id="user-message">Please wait. Your registration is being processed...</h2>
+<!--End user visible HTML-->
+
+<!--Script Begins Here-->
+<script>
+    window.onload = function() {
+        // These variables should be modified for your specific use case
+        const webhookUrl = 'https://example.com/webhook-endpoint'; // Replace this example URL with the actual webhook endpoint URL (e.g., from PowerAutomate first step)
+        const user_confirmation = "Thank you for registering for the event! You will receive a confirmation email shortly."; // Confirmation message to be displayed to the user.
+        const user_error = "There was an error processing your registration. Please reply to the invitation to let us know."; // Error message to be displayed to the user.
+
+        // GET Variables From Webpage URL (e.g. https://example.com/some-page/?event_id=301&contact_guid=81521e45-0630-4703-a214-a9d245f711c4)
+        const urlParams = new URLSearchParams(window.location.search);
+        const event_id = Number(urlParams.get('event_id')); // Convert the event ID to a number - try to keep the same data type as expected by the webhook and MP database
+        const contact_guid = urlParams.get('contact_guid'); // Keep the contact GUID as a string as expected by the webhook and MP database
+
+        // Function to update the user-message element or log a fallback message in case you do not want the <h2> element included in this script
+        function updateUserMessage(message) {
+            const userMessageElement = document.getElementById('user-message');
+            if (userMessageElement) {
+                userMessageElement.textContent = message;
+            } else {
+                console.warn('user-message element is missing. Logging the message instead.');
+                console.log(message);
+            }
+        }
+
+        // Check to see if event_id and contact_guid are present in the URL
+        if (!event_id || !contact_guid) {
+            console.error('Missing required URL parameters: event_id or contact_guid');
+            updateUserMessage(user_error); // Display or log the error message
+            return; // Stop further execution of the script
+        }
+
+        // Send a POST request to the webhook URL
+        console.log('Webhook payload:', JSON.stringify({ event_id, contact_guid }, null, 2)); // Log the content of the webhook payload as a formatted JSON string
+        fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ event_id, contact_guid })
+        })
+        .then(response => {
+
+            // Log the full response and status for debugging
+            console.log('Full response:', response);
+            console.log('Response status:', response.status);
+
+            // Handle non-2xx responses - this should cover 4xx and 5xx errors
+            if (!response.ok) {
+                console.error(`HTTP error! status: ${response.status}`);
+                updateUserMessage(user_error); // Display or log the error message
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        })
+        .then(data => {
+            updateUserMessage(user_confirmation); // Display or log the confirmation message
+            console.log('Response data:', data);
+        })
+        .catch(error => {
+            console.error('Error caught in .catch():', error);
+            updateUserMessage(user_error); // Display or log the error message
+        });
+    };
+</script>
