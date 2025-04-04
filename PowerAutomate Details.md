@@ -13,7 +13,7 @@ This flow has several main sections, each with outlined steps:
 2. [Set Variables](#set-variables)
 3. [Query MP for Participant_ID](#query-mp-for-participant_id)
 4. [Query MP for Existing Event Registrations](#query-mp-for-existing-event-registrations)
-5. [Create or Modify Event Participants](#create-or-modify-event-participants)
+5. [Update or Create Event Participant Records](#update-or-create-event-participant-records)
 
 ## Trigger
 ### 1. When an HTTP Request Is Received
